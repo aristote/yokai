@@ -1,0 +1,12 @@
+{
+  "summary": {
+    "title": "Replay attack",
+    "owner": "Me",
+    "description": "An attacker might be able to replay a watchdog \"alive\" message."
+  },
+  "detail": {
+    "contributors": [],
+    "diagrams": [],
+    "reviewer": "Me"
+  }
+}
