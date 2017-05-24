@@ -5,7 +5,11 @@
     "description": "An attacker might be able to replay a watchdog \"alive\" message."
   },
   "detail": {
-    "contributors": [],
+    "contributors": [
+      {
+        "name": "Me"
+      }
+    ],
     "diagrams": [
       {
         "title": "Attack",
