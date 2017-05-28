@@ -58,45 +58,45 @@ F0NxUmaPTAifrf7Ia9JOg02Hh4cJlTo=
 -----END CERTIFICATE-----`
 
 func build_message() string {
-// return the I'm alive message in the form of [current_epoch_time]:[hmac_verification]
-// the [hmac_verification] is a sha256 hmac of [mqtt_id]:[the alive message itself]
-// the hmac is to prevent a rogue device to send alive messages in place of another one
-// the current time in epoch format provide the nonce against replay attacks
+    // return the I'm alive message in the form of [current_epoch_time]:[hmac_verification]
+    // the [hmac_verification] is a sha256 hmac of [mqtt_id]:[the alive message itself]
+    // the hmac is to prevent a rogue device to send alive messages in place of another one
+    // the current time in epoch format provide the nonce against replay attacks
    now := time.Now()
-   var  my_msg string = fmt.Sprintf("%d", now.Unix())
-   var  my_verification string = mqtt_id + ":" + my_msg
-   message_hmac := hmac.New(sha256.New, []byte(hmac_secret))
-   message_hmac.Write([]byte(my_verification))
-   myHmac := fmt.Sprintf("%s", base64.StdEncoding.EncodeToString(message_hmac.Sum(nil)))
+    var  my_msg string = fmt.Sprintf("%d", now.Unix())
+    var  my_verification string = mqtt_id + ":" + my_msg
+    message_hmac := hmac.New(sha256.New, []byte(hmac_secret))
+    message_hmac.Write([]byte(my_verification))
+    myHmac := fmt.Sprintf("%s", base64.StdEncoding.EncodeToString(message_hmac.Sum(nil)))
 
-   my_msg += ":" + myHmac
+    my_msg += ":" + myHmac
 return my_msg
 }//message
 
 func main() {
-	rootca := x509.NewCertPool()
+    rootca := x509.NewCertPool()
     ok := rootca.AppendCertsFromPEM([]byte(mqtt_tls_ca))
     if !ok {
         panic("failed to parse root certificate")
     }
 
-	tlsConfig := &tls.Config{RootCAs: rootca}
+    tlsConfig := &tls.Config{RootCAs: rootca}
 
-   opts := MQTT.NewClientOptions()
-	opts.SetTLSConfig(tlsConfig) //we set the tls configuration
-	opts.AddBroker(broker) //we add the broker
-   opts.SetClientID(mqtt_id) //we set the mqtt id
-   opts.SetCleanSession(true) // Sets true to client and server should remember state across restarts and reconnect
-	opts.SetUsername(mqtt_login) // Set the mqtt server login
-	opts.SetPassword(mqtt_passwd) // Set the mqtt server password
-   c := MQTT.NewClient(opts) // Launch the client using the set options
-   if token := c.Connect(); token.Wait() && token.Error() != nil {
-      panic(token.Error())
+    opts := MQTT.NewClientOptions()
+    opts.SetTLSConfig(tlsConfig) //we set the tls configuration
+    opts.AddBroker(broker) //we add the broker
+    opts.SetClientID(mqtt_id) //we set the mqtt id
+    opts.SetCleanSession(true) // Sets true to client and server should remember state across restarts and reconnect
+    opts.SetUsername(mqtt_login) // Set the mqtt server login
+    opts.SetPassword(mqtt_passwd) // Set the mqtt server password
+    c := MQTT.NewClient(opts) // Launch the client using the set options
+    if token := c.Connect(); token.Wait() && token.Error() != nil {
+        panic(token.Error())
    }
 
-   var message string = build_message()
-   text := fmt.Sprintf("%s", message)
-   token := c.Publish(mqtt_subscribe, 0, false, text)
-   token.Wait()
-   c.Disconnect(250)
+    var message string = build_message()
+    text := fmt.Sprintf("%s", message)
+    token := c.Publish(mqtt_subscribe, 0, false, text)
+    token.Wait()
+    c.Disconnect(250)
 }//main
